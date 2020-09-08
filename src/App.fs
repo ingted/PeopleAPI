@@ -43,6 +43,8 @@ module Model =
         | [<EndPoint "DELETE /people">]
             DeletePerson of id: int
 
+        | [<EndPoint "GET /fubon">]
+            FubonOrderConf of timeStr:string
     /// The type of all endpoints for the application.
     type EndPoint =
         
@@ -115,6 +117,15 @@ module Backend =
                 Ok { id = id }
             | false, _ -> personNotFound()
 
+    let FubonOrderConf (s:string) : ApiResult<string array> =
+        
+        Ok [|
+            "-c"; "R"; "-k"; "any"; "-t"; "0"; "-o"; "0"; "-b"; "B"; "-s"; "6244"; "-q";
+            "1"; "-r"; "0"; "-p"; "1";
+            "-f"; "D:\config.json"; "-T";
+            s; "-B"; "150"; "-M"; "0"; "-V"; "10"; "-C"; "1"; "-L"; "5000"; "-U"; "1"; "-A";
+            "http://localhost:55201/api/fubon"|]
+
     // On application startup, pre-fill the database with a few people.
     do List.iter (CreatePerson >> ignore) [
         { id = 0
@@ -169,6 +180,8 @@ module Site =
             JsonContent (Backend.EditPerson personData)
         | DeletePerson id ->
             JsonContent (Backend.DeletePerson id)
+        | FubonOrderConf s ->
+            JsonContent (Backend.FubonOrderConf s)
 
     /// A simple HTML home page.
     let HomePage (ctx: Context<EndPoint>) : Async<Content<EndPoint>> =
