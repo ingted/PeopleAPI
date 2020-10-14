@@ -118,13 +118,21 @@ module Backend =
             | false, _ -> personNotFound()
 
     let FubonOrderConf (s:string) : ApiResult<string array> =
-        
+        let ss = 
+            if s = "" || s = null then
+                let now = System.DateTime.Now
+                printfn "now: %s" <| now.ToString("yyyy-MM-ddTHH:mm:ss.fff")
+                printfn "now added 30s: %s" <| now.AddMilliseconds(30000.0).ToString("yyyy-MM-ddTHH:mm:ss.fff")
+                System.DateTime.Now.AddMilliseconds(30000.0).ToString("yyyy-MM-ddTHH:mm:ss.fff")
+            else
+                s
+        let LR = System.DateTime.Now.AddMilliseconds(25000.0).ToString("yyyy-MM-ddTHH:mm:ss.fff")
         Ok [|
             "-c"; "R"; "-k"; "any"; "-t"; "0"; "-o"; "0"; "-b"; "B"; "-s"; "6244"; "-q";
             "1"; "-r"; "0"; "-p"; "1";
             "-f"; "D:\config.json"; "-T";
-            s; "-B"; "150"; "-M"; "0"; "-V"; "10"; "-C"; "1"; "-L"; "5000"; "-U"; "1"; "-A";
-            "http://localhost:55201/api/fubon"|]
+            ss; "-D"; LR; "-B"; "150"; "-M"; "1"; "-V"; "3"; "-C"; "1"; (*"-L"; "5000";*) "-U"; "1"; "-A";
+            "https://localhost:55201/api/fubon"|]
 
     // On application startup, pre-fill the database with a few people.
     do List.iter (CreatePerson >> ignore) [
