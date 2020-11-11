@@ -70,7 +70,8 @@ open Model
 /// This module implements the back-end of the application.
 /// It's a CRUD application maintaining a basic in-memory database of people.
 module Backend =
-
+    type dt () =
+        static member val ddt : DateTime = DateTime.Now with get, set
     /// The people database.
     /// This is a dummy implementation, of course; a real-world application
     /// would go to an actual database.
@@ -118,21 +119,42 @@ module Backend =
             | false, _ -> personNotFound()
 
     let FubonOrderConf (s:string) : ApiResult<string array> =
-        let ss = 
-            if s = "" || s = null then
-                let now = System.DateTime.Now
-                printfn "now: %s" <| now.ToString("yyyy-MM-ddTHH:mm:ss.fff")
-                printfn "now added 30s: %s" <| now.AddMilliseconds(30000.0).ToString("yyyy-MM-ddTHH:mm:ss.fff")
-                System.DateTime.Now.AddMilliseconds(30000.0).ToString("yyyy-MM-ddTHH:mm:ss.fff")
-            else
-                s
-        let LR = System.DateTime.Now.AddMilliseconds(25000.0).ToString("yyyy-MM-ddTHH:mm:ss.fff")
+         
+        let ss =            
+                if s = "" || s = null then
+                    let nowOpt = System.DateTime.Now.AddMilliseconds(30000.0)
+                    
+                    //let LR = System.DateTime.Now.AddMilliseconds(25000.0).ToString("yyyy-MM-ddTHH:mm:ss.fff")
+                    let diff = int (nowOpt - dt.ddt).TotalMilliseconds
+                    if diff < 60000 then
+                        dt.ddt.ToString("yyyy-MM-ddTHH:mm:ss.fff")
+                    else
+                    dt.ddt <- nowOpt
+                    //let now = System.DateTime.Now
+                    //printfn "now: %s" <| now.ToString("yyyy-MM-ddTHH:mm:ss.fff")
+                    printfn "now added 30s: %s" <| nowOpt.ToString("yyyy-MM-ddTHH:mm:ss.fff")
+                    nowOpt.ToString("yyyy-MM-ddTHH:mm:ss.fff")
+                else
+                    let nowOpt = DateTime.Parse s
+                    
+                    let diff = int (nowOpt - dt.ddt).TotalMilliseconds
+                    if diff < 120000 then
+                        dt.ddt.ToString("yyyy-MM-ddTHH:mm:ss.fff")
+                    else
+                        dt.ddt <- nowOpt
+                        s
+        //Ok [|
+        //    "-c"; "R"; "-k"; "any"; "-t"; "0"; "-o"; "0"; "-b"; "B"; "-s"; "6244"; "-q";
+        //    "1"; "-r"; "0"; "-p"; "1";
+        //    "-f"; "D:\config.json"; "-T";
+        //    ss; "-D"; LR; "-B"; "150"; "-M"; "1"; "-V"; "3"; "-C"; "1"; (*"-L"; "5000";*) "-U"; "1"; "-A";
+        //    "https://localhost:55201/api/fubon"|] //fubon
         Ok [|
-            "-c"; "R"; "-k"; "any"; "-t"; "0"; "-o"; "0"; "-b"; "B"; "-s"; "6244"; "-q";
-            "1"; "-r"; "0"; "-p"; "1";
+            "-c"; "0"; "-k"; "any"; "-t"; "0"; "-o"; "0"; "-b"; "B"; "-s"; "1232"; "-q";
+            "1"; "-r"; "1"; "-p"; ""; "--MARKET"; "T"; "--broker-id"; "9228"; "--ecode"; "00"
             "-f"; "D:\config.json"; "-T";
-            ss; "-D"; LR; "-B"; "150"; "-M"; "1"; "-V"; "3"; "-C"; "1"; (*"-L"; "5000";*) "-U"; "1"; "-A";
-            "https://localhost:55201/api/fubon"|]
+            ss; "-D"; ss; "-B"; "1500"; "-M"; "0"; "-V"; "20"; "-C"; "1"; (*"-L"; "5000";*) "-U"; "1"; "-A";
+            "https://localhost:5000/api/fubon"|]
 
     // On application startup, pre-fill the database with a few people.
     do List.iter (CreatePerson >> ignore) [

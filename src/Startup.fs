@@ -32,14 +32,25 @@ type Startup() =
             .Run(fun context ->
                 context.Response.StatusCode <- 404
                 context.Response.WriteAsync("Page not found"))
+            
 
 module Program =
 
     [<EntryPoint>]
     let main args =
-        WebHost
-            .CreateDefaultBuilder(args)
-            .UseStartup<Startup>()
-            .Build()
-            .Run()
+
+        let host = 
+            (new WebHostBuilder())
+                .UseKestrel()
+                .UseIISIntegration()
+                .UseStartup<Startup>()
+                .UseUrls("http://192.168.123.111:5000") // <-----
+                .Build()
+        host.Run()
+
+        //WebHost
+        //    .CreateDefaultBuilder(args)
+        //    .UseStartup<Startup>()
+        //    .Build()
+            
         0
